@@ -1,5 +1,7 @@
 package edu.dh.asynctask.model.DAO;
 
+import android.os.AsyncTask;
+
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -12,12 +14,19 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import edu.dh.asynctask.controller.interfaces.ControllerModelInterface;
 import edu.dh.asynctask.model.Noticia;
 import edu.dh.asynctask.model.NoticiasResposta;
 
-public class DAOInternet {
+public class DAOInternet extends AsyncTask<String, Void, List<Noticia>> {
 
-    public List<Noticia> obterListaDeNoticiasDaInternet() {
+	private ControllerModelInterface listenerController;
+
+	public void setListenerController(ControllerModelInterface listenerController) {
+		this.listenerController = listenerController;
+	}
+
+	public List<Noticia> obterListaDeNoticiasDaInternet() {
 
         try {
             URL url = new URL("https://api.myjson.com/bins/y7jl6");
@@ -31,8 +40,10 @@ public class DAOInternet {
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
+            listenerController.erro();
         } catch (IOException e) {
             e.printStackTrace();
+            listenerController.erro();
         }
 
         return null;
@@ -97,4 +108,16 @@ public class DAOInternet {
         }
         return result;
     }
+
+	@Override
+	protected List<Noticia> doInBackground(String... strings) {
+		return obterListaDeNoticiasDaInternet();
+	}
+
+	@Override
+	protected void onPostExecute(List<Noticia> noticias) {
+		super.onPostExecute(noticias);
+		listenerController.sucesso(noticias);
+	}
+
 }
